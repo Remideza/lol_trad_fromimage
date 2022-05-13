@@ -5,7 +5,7 @@ Traduce the League of legends ingame chat by capturing the ingame window
 ## Requirements
 
 - TesseractOCR with the language packages you plan on using (https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
-- Mentionned python packages at the start of the 
+- Mentionned python packages at the start of the main
 
 ## Config
 
