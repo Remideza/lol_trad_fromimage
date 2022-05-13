@@ -1,4 +1,4 @@
-# League of Legends ingame traductor
+# League of Legends ingame translator
 
 Traduce the League of legends ingame chat by capturing the ingame window
 
