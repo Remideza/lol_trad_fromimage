@@ -67,7 +67,7 @@ time.sleep(5)
 while True:
     try:
         screen = get_cleaned_text_img()
-
+        printlines = False
         textlines = []
         #Splitting the text in lines for better traduction
         for i in range(screen.shape[0],0,-LINESIZE):
@@ -98,6 +98,7 @@ while True:
                     textlines = [line] + textlines
                 else:
                     textlines = [translator.translate(text, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','')] + textlines
+                printlines=True
             else:
                 textlines = [""] + textlines
 
@@ -107,10 +108,11 @@ while True:
                     break
                 time.sleep(1)
 
-        print("----------------------------------------------------------------------------------------------------------")
-        for l in textlines:
-            print(l)
-        print("----------------------------------------------------------------------------------------------------------")
-        time.sleep(1)
+        if printlines: #Don't print if no text detected
+            print("----------------------------------------------------------------------------------------------------------")
+            for l in textlines:
+                print(l)
+            print("----------------------------------------------------------------------------------------------------------")
+            time.sleep(1)
     except Exception as e:
         print(traceback.format_exc())
