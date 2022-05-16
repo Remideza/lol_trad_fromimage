@@ -85,7 +85,7 @@ while True:
                     line = ""
                     msgt = text.split(')')[1]
 
-                    if msgt != text:
+                    if msgt != None and msgt != text:
                         headername = text.replace(msgt,'')
                         if "(" in headername:
                             summname, champname = headername.split('(')[0], headername.split('(')[1].replace(')','')
