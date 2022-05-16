@@ -8,6 +8,7 @@ import time
 from PIL import Image
 from numpy import asarray
 from googletrans import Translator
+import traceback
 
 pytesseract.pytesseract.tesseract_cmd = r'K:\Code\Tesseract\tesseract.exe'
 
@@ -18,7 +19,7 @@ LANG_FROM_GTRAD = "ko"
 LANG_TO_GTRAD = "en"
 
 DEBUG_WINDOW = False
-DEBUG_IMAGE = True
+DEBUG_IMAGE = False
 
 #TODO: Better image cleaning using text colors (blue for names, white for messages, red for ennemies, yellow for private messages)
 #TODO: When a message use a CRLF, the "per line" traduction is not the right method since the sentence is cutted in half thus resulting in a bad traduction
@@ -64,49 +65,52 @@ time.sleep(5)
 
 #Main loop
 while True:
-    screen = get_cleaned_text_img()
+    try:
+        screen = get_cleaned_text_img()
 
-    textlines = []
-    #Splitting the text in lines for better traduction
-    for i in range(screen.shape[0],0,-LINESIZE):
-        screen_as_np = screen[i-LINESIZE:i,0:WINDOWPOS[1][1]-WINDOWPOS[1][0]]
-        screen_as_np = np.pad(screen_as_np, pad_width=20, mode='constant', constant_values=255)
-        if i-LINESIZE<0:
-            break
-
-        text = pytesseract.image_to_string(screen_as_np, lang=LANG_FROM_TESS)
-        # cleaning the line from chariots and bad parentheses detection
-        text = text.replace('\n','').replace('\r','')
-        if (text):
-            #Splitting the line into 3 parts (summoner name, champion name, text) if possible, to traduce with more precision
-            if ')' in text:
-                line = ""
-                msgt = text.split(')')[1]
-
-                if msgt != text:
-                    headername = text.replace(msgt,'')
-                    if "(" in headername:
-                        summname, champname = headername.split('(')[0], headername.split('(')[1].replace(')','')
-                        if summname != headername or champname != headername:
-                            line = translator.translate(summname, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','') + \
-                                "(" + translator.translate(champname, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','') + ") : "
-                        else:
-                            line = translator.translate(headername, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','') + " : "
-                        line += translator.translate(msgt, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n', '').replace('\r', '')
-                textlines = [line] + textlines
-            else:
-                textlines = [translator.translate(text, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','')] + textlines
-        else:
-            textlines = [""] + textlines
-
-        if(DEBUG_WINDOW):
-            cv2.imshow('i', screen_as_np)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+        textlines = []
+        #Splitting the text in lines for better traduction
+        for i in range(screen.shape[0],0,-LINESIZE):
+            screen_as_np = screen[i-LINESIZE:i,0:WINDOWPOS[1][1]-WINDOWPOS[1][0]]
+            screen_as_np = np.pad(screen_as_np, pad_width=20, mode='constant', constant_values=255)
+            if i-LINESIZE<0:
                 break
-            time.sleep(1)
 
-    print("----------------------------------------------------------------------------------------------------------")
-    for l in textlines:
-        print(l)
-    print("----------------------------------------------------------------------------------------------------------")
-    time.sleep(1)
+            text = pytesseract.image_to_string(screen_as_np, lang=LANG_FROM_TESS)
+            # cleaning the line from chariots and bad parentheses detection
+            text = text.replace('\n','').replace('\r','')
+            if (text):
+                #Splitting the line into 3 parts (summoner name, champion name, text) if possible, to traduce with more precision
+                if ')' in text:
+                    line = ""
+                    msgt = text.split(')')[1]
+
+                    if msgt != text:
+                        headername = text.replace(msgt,'')
+                        if "(" in headername:
+                            summname, champname = headername.split('(')[0], headername.split('(')[1].replace(')','')
+                            if summname != headername or champname != headername:
+                                line = translator.translate(summname, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','') + \
+                                    "(" + translator.translate(champname, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','') + ") : "
+                            else:
+                                line = translator.translate(headername, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','') + " : "
+                            line += translator.translate(msgt, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n', '').replace('\r', '')
+                    textlines = [line] + textlines
+                else:
+                    textlines = [translator.translate(text, src=LANG_FROM_GTRAD, dest=LANG_TO_GTRAD).text.replace('\n','').replace('\r','')] + textlines
+            else:
+                textlines = [""] + textlines
+
+            if(DEBUG_WINDOW):
+                cv2.imshow('i', screen_as_np)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                time.sleep(1)
+
+        print("----------------------------------------------------------------------------------------------------------")
+        for l in textlines:
+            print(l)
+        print("----------------------------------------------------------------------------------------------------------")
+        time.sleep(1)
+    except Exception as e:
+        print(traceback.format_exc())
