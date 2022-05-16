@@ -1,6 +1,6 @@
 # League of Legends ingame translator
 
-Traduce the League of legends ingame chat by capturing the ingame window
+Traduce the League of legends ingame chat by capturing the game window
 
 ## Requirements
 
